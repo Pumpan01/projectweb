@@ -19,12 +19,21 @@ import {
   Tooltip,
   CircularProgress,
   Box,
+  Drawer,
+  List,
+  ListItem,
+  ListItemText,
+  AppBar,
+  Toolbar,
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
+import MenuIcon from "@mui/icons-material/Menu";
+import GroupIcon from "@mui/icons-material/Group";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { useNavigate } from "react-router-dom";
 
 function UserManagement() {
   const [users, setUsers] = useState([]);
@@ -32,6 +41,7 @@ function UserManagement() {
   const [openDialog, setOpenDialog] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState(null);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [formData, setFormData] = useState({
     user_id: "",
     username: "",
@@ -42,8 +52,9 @@ function UserManagement() {
     room_id: "",
   });
   const [isEditing, setIsEditing] = useState(false);
+  const navigate = useNavigate();
 
-  // Fetch all users
+  // Fetch Users
   const fetchUsers = async () => {
     setLoading(true);
     try {
@@ -51,7 +62,6 @@ function UserManagement() {
       const data = await response.json();
       setUsers(data || []);
     } catch (error) {
-      console.error("Error fetching users:", error);
       toast.error("เกิดข้อผิดพลาดในการดึงข้อมูลผู้ใช้", {
         position: "top-center",
         autoClose: 2000,
@@ -130,14 +140,12 @@ function UserManagement() {
         fetchUsers();
         handleCloseDialog();
       } else {
-        const errorData = await response.json();
-        toast.error(errorData.error || "เกิดข้อผิดพลาด", {
+        toast.error("roomid นี้มีผู้ใช้งานแล้ว", {
           position: "top-center",
           autoClose: 2000,
         });
       }
     } catch (error) {
-      console.error("Error saving user:", error);
       toast.error("เกิดข้อผิดพลาดในการบันทึกข้อมูล", {
         position: "top-center",
         autoClose: 2000,
@@ -168,14 +176,12 @@ function UserManagement() {
         });
         fetchUsers();
       } else {
-        const errorData = await response.json();
-        toast.error(errorData.error || "เกิดข้อผิดพลาดในการลบผู้ใช้", {
+        toast.error("เกิดข้อผิดพลาดในการลบผู้ใช้", {
           position: "top-center",
           autoClose: 2000,
         });
       }
     } catch (error) {
-      console.error("Error deleting user:", error);
       toast.error("เกิดข้อผิดพลาดในการลบผู้ใช้", {
         position: "top-center",
         autoClose: 2000,
@@ -185,186 +191,221 @@ function UserManagement() {
   };
 
   return (
-    <Container maxWidth="lg" sx={{ mt: 4 }}>
-      <ToastContainer />
-      <Typography
-        variant="h4"
-        fontWeight="bold"
-        gutterBottom
-        sx={{
-          textAlign: "center",
-          color: "#ff5722",
-          textShadow: "2px 2px 5px #ffe0b2",
-        }}
+    <>
+      {/* Sidebar */}
+      <Drawer
+        anchor="left"
+        open={isSidebarOpen}
+        onClose={() => setIsSidebarOpen(false)}
       >
-        จัดการผู้ใช้งาน
-      </Typography>
+        <Box sx={{ width: 250, padding: 2 }}>
+          <Typography variant="h6" fontWeight="bold" textAlign="center">
+            เมนูหลัก
+          </Typography>
+          <List>
+            <ListItem button onClick={() => navigate("/home")}>
+              <GroupIcon sx={{ marginRight: 1 }} />
+              <ListItemText primary="หน้าหลัก" />
+            </ListItem>
+          </List>
+        </Box>
+      </Drawer>
 
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-        <Button
-          variant="contained"
-          startIcon={<AddIcon />}
-          sx={{
-            background: "linear-gradient(45deg, #ff7043, #ff5722)",
-            "&:hover": {
-              background: "linear-gradient(45deg, #ff5722, #e64a19)",
-            },
-            transition: "0.3s",
-          }}
-          onClick={() => handleOpenDialog()}
+      {/* Header */}
+      <AppBar position="sticky" sx={{ bgcolor: "#ff5722" }}>
+        <Toolbar>
+          <IconButton
+            edge="start"
+            color="inherit"
+            onClick={() => setIsSidebarOpen(true)}
+          >
+            <MenuIcon />
+          </IconButton>
+          <Typography
+            variant="h3"
+            sx={{
+              flexGrow: 1,
+              textAlign: "center",
+              fontSize: { xs: "20px", sm: "30px", md: "40px", lg: "50px" },
+            }}
+          >
+            การจัดการผู้ใช้
+          </Typography>
+        </Toolbar>
+      </AppBar>
+
+      {/* Content */}
+      <Container maxWidth="lg" sx={{ mt: 4 }}>
+        <ToastContainer />
+        <Box
+          display="flex"
+          justifyContent="space-between"
+          alignItems="center"
+          mb={2}
         >
-          เพิ่มผู้ใช้
-        </Button>
-      </Box>
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            sx={{
+              background: "linear-gradient(45deg, #ff7043, #ff5722)",
+              "&:hover": {
+                background: "linear-gradient(45deg, #ff5722, #e64a19)",
+              },
+              transition: "0.3s",
+            }}
+            onClick={() => handleOpenDialog()}
+          >
+            เพิ่มผู้ใช้
+          </Button>
+        </Box>
 
-      <TableContainer component={Paper} elevation={6} sx={{ borderRadius: 2 }}>
-        {loading ? (
-          <CircularProgress
-            sx={{ display: "block", margin: "20px auto" }}
-            color="primary"
-          />
-        ) : (
-          <Table>
-            <TableHead
-              sx={{
-                backgroundColor: "#ff5722",
-                "& th": { color: "white", fontWeight: "bold" },
-              }}
-            >
-              <TableRow>
-                <TableCell>ID</TableCell>
-                <TableCell>ชื่อผู้ใช้</TableCell>
-                <TableCell>ชื่อเต็ม</TableCell>
-                <TableCell>เบอร์โทร</TableCell>
-                <TableCell>Line ID</TableCell>
-                <TableCell>Room ID</TableCell>
-                <TableCell align="right">การกระทำ</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {users.map((user) => (
-                <TableRow
-                  key={user.user_id}
-                  sx={{
-                    "&:hover": { backgroundColor: "#ffe0b2" },
-                    transition: "0.3s",
-                  }}
-                >
-                  <TableCell>{user.user_id}</TableCell>
-                  <TableCell>{user.username}</TableCell>
-                  <TableCell>{user.full_name}</TableCell>
-                  <TableCell>{user.phone_number}</TableCell>
-                  <TableCell>{user.line_id}</TableCell>
-                  <TableCell>{user.room_id}</TableCell>
-                  <TableCell align="right">
-                    <Tooltip title="แก้ไข">
-                      <IconButton
-                        color="primary"
-                        onClick={() => handleOpenDialog(user)}
-                      >
-                        <EditIcon />
-                      </IconButton>
-                    </Tooltip>
-                    <Tooltip title="ลบ">
-                      <IconButton
-                        color="error"
-                        onClick={() => handleOpenDeleteDialog(user.user_id)}
-                      >
-                        <DeleteIcon />
-                      </IconButton>
-                    </Tooltip>
-                  </TableCell>
+        {/* Table */}
+        <TableContainer
+          component={Paper}
+          elevation={6}
+          sx={{ borderRadius: 2, overflowX: "auto" }}
+        >
+          {loading ? (
+            <CircularProgress sx={{ display: "block", margin: "20px auto" }} />
+          ) : (
+            <Table>
+              <TableHead
+                sx={{
+                  backgroundColor: "#ff5722",
+                  "& th": { color: "white", fontWeight: "bold", textAlign: "center" },
+                }}
+              >
+                <TableRow>
+                  <TableCell>ID</TableCell>
+                  <TableCell>ชื่อผู้ใช้</TableCell>
+                  <TableCell>ชื่อเต็ม</TableCell>
+                  <TableCell>เบอร์โทร</TableCell>
+                  <TableCell>Line ID</TableCell>
+                  <TableCell>Room ID</TableCell>
+                  <TableCell align="right">การกระทำ</TableCell>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        )}
-      </TableContainer>
+              </TableHead>
+              <TableBody>
+                {users.map((user) => (
+                  <TableRow
+                    key={user.user_id}
+                    sx={{
+                      "&:hover": { backgroundColor: "#ffe0b2" },
+                      transition: "0.3s",
+                      "& td": { textAlign: "center" },
+                    }}
+                  >
+                    <TableCell>{user.user_id}</TableCell>
+                    <TableCell>{user.username}</TableCell>
+                    <TableCell>{user.full_name}</TableCell>
+                    <TableCell>{user.phone_number}</TableCell>
+                    <TableCell>{user.line_id}</TableCell>
+                    <TableCell>{user.room_id}</TableCell>
+                    <TableCell align="right">
+                      <Tooltip title="แก้ไข">
+                        <IconButton
+                          color="primary"
+                          onClick={() => handleOpenDialog(user)}
+                        >
+                          <EditIcon />
+                        </IconButton>
+                      </Tooltip>
+                      <Tooltip title="ลบ">
+                        <IconButton
+                          color="error"
+                          onClick={() => handleOpenDeleteDialog(user.user_id)}
+                        >
+                          <DeleteIcon />
+                        </IconButton>
+                      </Tooltip>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </TableContainer>
 
-      {/* Dialog เพิ่ม/แก้ไข */}
-      <Dialog
-        open={openDialog}
-        onClose={handleCloseDialog}
-        maxWidth="sm"
-        fullWidth
-      >
-        <DialogTitle sx={{ textAlign: "center", fontWeight: "bold" }}>
-          {isEditing ? "แก้ไขผู้ใช้" : "เพิ่มผู้ใช้"}
-        </DialogTitle>
-        <DialogContent>
-          <TextField
-            label="ชื่อผู้ใช้"
-            name="username"
-            fullWidth
-            margin="normal"
-            value={formData.username || ""}
-            onChange={handleChange}
-          />
-          {!isEditing && (
+        {/* Dialog เพิ่ม/แก้ไข */}
+        <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="sm" fullWidth>
+          <DialogTitle sx={{ textAlign: "center", fontWeight: "bold" }}>
+            {isEditing ? "แก้ไขผู้ใช้" : "เพิ่มผู้ใช้"}
+          </DialogTitle>
+          <DialogContent>
             <TextField
-              label="รหัสผ่าน"
-              type="password"
-              name="password"
+              label="ชื่อผู้ใช้"
+              name="username"
               fullWidth
               margin="normal"
-              value={formData.password || ""}
+              value={formData.username || ""}
               onChange={handleChange}
             />
-          )}
-          <TextField
-            label="ชื่อเต็ม"
-            name="full_name"
-            fullWidth
-            margin="normal"
-            value={formData.full_name || ""}
-            onChange={handleChange}
-          />
-          <TextField
-            label="เบอร์โทร"
-            name="phone_number"
-            fullWidth
-            margin="normal"
-            value={formData.phone_number || ""}
-            onChange={handleChange}
-          />
-          <TextField
-            label="Line ID"
-            name="line_id"
-            fullWidth
-            margin="normal"
-            value={formData.line_id || ""}
-            onChange={handleChange}
-          />
-          <TextField
-            label="Room ID"
-            name="room_id"
-            type="number"
-            fullWidth
-            margin="normal"
-            value={formData.room_id || ""}
-            onChange={handleChange}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseDialog}>ยกเลิก</Button>
-          <Button onClick={handleSaveUser}>บันทึก</Button>
-        </DialogActions>
-      </Dialog>
+            {!isEditing && (
+              <TextField
+                label="รหัสผ่าน"
+                type="password"
+                name="password"
+                fullWidth
+                margin="normal"
+                value={formData.password || ""}
+                onChange={handleChange}
+              />
+            )}
+            <TextField
+              label="ชื่อเต็ม"
+              name="full_name"
+              fullWidth
+              margin="normal"
+              value={formData.full_name || ""}
+              onChange={handleChange}
+            />
+            <TextField
+              label="เบอร์โทร"
+              name="phone_number"
+              fullWidth
+              margin="normal"
+              value={formData.phone_number || ""}
+              onChange={handleChange}
+            />
+            <TextField
+              label="Line ID"
+              name="line_id"
+              fullWidth
+              margin="normal"
+              value={formData.line_id || ""}
+              onChange={handleChange}
+            />
+            <TextField
+              label="Room ID"
+              name="room_id"
+              type="number"
+              fullWidth
+              margin="normal"
+              value={formData.room_id || ""}
+              onChange={handleChange}
+            />
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleCloseDialog}>ยกเลิก</Button>
+            <Button onClick={handleSaveUser}>บันทึก</Button>
+          </DialogActions>
+        </Dialog>
 
-      {/* Dialog ลบ */}
-      <Dialog
-        open={deleteDialogOpen}
-        onClose={handleCloseDeleteDialog}
-        maxWidth="xs"
-      >
-        <DialogTitle>ยืนยันการลบ</DialogTitle>
-        <DialogContent>คุณต้องการลบผู้ใช้นี้ใช่หรือไม่?</DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseDeleteDialog}>ยกเลิก</Button>
-          <Button onClick={handleDeleteUser}>ลบ</Button>
-        </DialogActions>
-      </Dialog>
-    </Container>
+        {/* Dialog ลบ */}
+        <Dialog
+          open={deleteDialogOpen}
+          onClose={handleCloseDeleteDialog}
+          maxWidth="xs"
+        >
+          <DialogTitle>ยืนยันการลบ</DialogTitle>
+          <DialogContent>คุณต้องการลบผู้ใช้นี้ใช่หรือไม่?</DialogContent>
+          <DialogActions>
+            <Button onClick={handleCloseDeleteDialog}>ยกเลิก</Button>
+            <Button onClick={handleDeleteUser}>ลบ</Button>
+          </DialogActions>
+        </Dialog>
+      </Container>
+    </>
   );
 }
 

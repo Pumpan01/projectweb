@@ -1,243 +1,183 @@
-import React, { useState, useEffect } from "react";
-import {
-  Box,
-  Typography,
-  Grid,
-  Paper,
-  Button,
-  Avatar,
-  List,
-  ListItem,
-  ListItemAvatar,
-  ListItemText,
-  Divider,
-  AppBar,
-  Toolbar,
-  Drawer,
-  IconButton,
-  CssBaseline,
-} from "@mui/material";
-import MenuIcon from "@mui/icons-material/Menu";
-import NotificationsActiveIcon from "@mui/icons-material/NotificationsActive";
-import BuildIcon from "@mui/icons-material/Build";
-import GroupIcon from "@mui/icons-material/Group";
-import LogoutIcon from "@mui/icons-material/Logout";
-import { useNavigate } from "react-router-dom";
-import { toast, ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-import "./HeaderAnimation.css";
+import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 
-const drawerWidth = 240;
-
-function HomePage() {
-  const navigate = useNavigate();
-  const [mobileOpen, setMobileOpen] = useState(false);
+const HomePage = () => {
   const [users, setUsers] = useState([]);
-  const notifications = [
-    "แจ้งเตือน: ค่าน้ำครบกำหนดชำระวันที่ 20/12/2024",
-    "แจ้งเตือน: แจ้งซ่อมประตูห้อง 301 เรียบร้อยแล้ว",
-    "แจ้งเตือน: ระบบจะปิดปรับปรุงในวันที่ 25/12/2024",
-  ];
 
-  const fetchUsers = async () => {
-    try {
-      const response = await fetch("http://localhost:4000/api/users");
-      if (response.ok) {
-        const data = await response.json();
-        setUsers(data);
-      } else {
-        toast.error("เกิดข้อผิดพลาดในการดึงข้อมูลผู้ใช้", {
-          position: "top-center",
-          autoClose: 1000,
-        });
-      }
-    } catch (error) {
-      console.error("Error fetching users:", error);
-      toast.error("เกิดข้อผิดพลาดในการเชื่อมต่อกับเซิร์ฟเวอร์", {
-        position: "top-center",
-        autoClose: 1000,
-      });
-    }
-  };
-
+  // ดึงข้อมูลผู้ใช้
   useEffect(() => {
-    fetchUsers();
+    fetch("http://localhost:4000/api/users")
+      .then((response) => response.json())
+      .then((data) => setUsers(data))
+      .catch((error) => console.error("Error fetching users:", error));
   }, []);
 
-  const handleLogout = () => {
-    toast.success("ออกจากระบบสำเร็จ", {
-      position: "top-center",
-      autoClose: 1000,
-    });
-
-    setTimeout(() => {
-      navigate("/");
-    }, 1000);
-  };
-
-  const toggleDrawer = () => {
-    setMobileOpen(!mobileOpen);
-  };
-
-  const drawer = (
-    <Box
-      sx={{
-        width: drawerWidth,
-        bgcolor: "#f7f7f7",
-        height: "100vh",
-        borderRight: "1px solid #ddd",
-      }}
-    >
-      <Toolbar>
-        <Typography variant="h6" sx={{ fontWeight: "bold", color: "#ff5722" }}>
-          HorPlus
-        </Typography>
-      </Toolbar>
-      <Divider />
-      <List>
-        <ListItem button onClick={() => navigate("/user")}>
-          {" "}
-          {/* ไปยัง user.js */}
-          <GroupIcon sx={{ color: "#ff5722", marginRight: "8px" }} />
-          <ListItemText primary="ข้อมูลผู้ใช้งาน" />
-        </ListItem>
-        <ListItem button>
-          <BuildIcon sx={{ color: "#ff5722", marginRight: "8px" }} />
-          <ListItemText primary="แจ้งซ่อม" />
-        </ListItem>
-        <ListItem button>
-          <NotificationsActiveIcon
-            sx={{ color: "#ff5722", marginRight: "8px" }}
-          />
-          <ListItemText primary="การแจ้งเตือน" />
-        </ListItem>
-      </List>
-    </Box>
-  );
-
   return (
-    <Box sx={{ display: "flex" }}>
-      <ToastContainer />
-      <CssBaseline />
-      {/* AppBar */}
-      <AppBar
-        position="fixed"
-        sx={{ zIndex: (theme) => theme.zIndex.drawer + 1, bgcolor: "#ff5722" }}
-      >
-        <Toolbar>
-          <IconButton
-            color="inherit"
-            aria-label="open drawer"
-            edge="start"
-            onClick={toggleDrawer}
-            sx={{ mr: 2, display: { sm: "none" } }}
-          >
-            <MenuIcon />
-          </IconButton>
-          <Typography
-            variant="h3"
-            noWrap
-            sx={{
-              flexGrow: 1,
-              textAlign: "center",
-              overflow: "hidden", // ซ่อนข้อความที่เลื่อนออกไป
-            }}
-            className="glowing-text"
-          >
-            ระบบจัดการหอพัก HorPlus
-          </Typography>
+    <div style={styles.container}>
+      {/* Header */}
+      <header style={styles.header}>
+        <h1 style={styles.headerTitle}>ระบบจัดการหอพัก</h1>
+        <p style={styles.headerSubtitle}>จัดการข้อมูลทั้งหมดในระบบได้ที่นี่</p>
+      </header>
 
-          <Button
-            color="inherit"
-            startIcon={<LogoutIcon />}
-            onClick={handleLogout}
-            sx={{
-              fontWeight: "bold",
-              textTransform: "uppercase",
-              bgcolor: "#fff",
-              color: "#ff5722",
-              "&:hover": { bgcolor: "#ffe0b2" },
-            }}
-          >
-            ออกจากระบบ
-          </Button>
-        </Toolbar>
-      </AppBar>
+      {/* Quick Navigation */}
+      <div style={styles.navigationContainer}>
+        <h2 style={styles.navigationTitle}>เมนูการจัดการ</h2>
+        <div style={styles.navigationButtons}>
+          <Link to="/user" style={styles.navButton}>
+            จัดการผู้ใช้
+          </Link>
+          <Link to="/repair" style={styles.navButton}>
+            การแจ้งซ่อม
+          </Link>
+          <Link to="/announcements" style={styles.navButton}>
+            จัดการประกาศ
+          </Link>
+          <Link to="/billing" style={styles.navButton}>
+            บิล
+          </Link>
+        </div>
+      </div>
 
-      {/* Sidebar Drawer */}
-      <Box
-        component="nav"
-        sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 } }}
-        aria-label="mailbox folders"
-      >
-        <Drawer
-          variant="temporary"
-          open={mobileOpen}
-          onClose={toggleDrawer}
-          ModalProps={{
-            keepMounted: true, // Better open performance on mobile.
-          }}
-          sx={{
-            display: { xs: "block", sm: "none" },
-            "& .MuiDrawer-paper": {
-              boxSizing: "border-box",
-              width: drawerWidth,
-            },
-          }}
-        >
-          {drawer}
-        </Drawer>
-        <Drawer
-          variant="permanent"
-          sx={{
-            display: { xs: "none", sm: "block" },
-            "& .MuiDrawer-paper": {
-              boxSizing: "border-box",
-              width: drawerWidth,
-            },
-          }}
-          open
-        >
-          {drawer}
-        </Drawer>
-      </Box>
-
-      {/* Main Content */}
-      <Box
-        component="main"
-        sx={{ flexGrow: 1, p: 3, bgcolor: "#f9f9f9", minHeight: "100vh" }}
-      >
-        <Toolbar />
-        <Grid container spacing={4}>
-          {/* ข้อมูลผู้ใช้งาน */}
-          <Grid item xs={12}>
-            <Paper elevation={3} sx={{ padding: 3 }}>
-              <Typography variant="h6" fontWeight="bold" gutterBottom>
-                ข้อมูลผู้ใช้งาน
-              </Typography>
-              <List>
-                {users.map((user) => (
-                  <ListItem key={user.user_id} divider>
-                    <ListItemAvatar>
-                      <Avatar sx={{ bgcolor: "#ff7043" }}>
-                        {user.username.charAt(0).toUpperCase()}
-                      </Avatar>
-                    </ListItemAvatar>
-                    <ListItemText
-                      primary={`ชื่อผู้ใช้: ${user.username}`}
-                      secondary={`ชื่อเต็ม: ${
-                        user.full_name || "N/A"
-                      } | ห้อง: ${user.room_id || "N/A"}`}
-                    />
-                  </ListItem>
-                ))}
-              </List>
-            </Paper>
-          </Grid>
-        </Grid>
-      </Box>
-    </Box>
+      {/* Sidebar */}
+      <aside style={styles.sidebar}>
+        <h2 style={styles.sidebarTitle}>รายชื่อผู้ใช้</h2>
+        <ul style={styles.userList}>
+          {users.map((user) => (
+            <li key={user.user_id} style={styles.userItem}>
+              <strong>{user.full_name || "ไม่ระบุชื่อ"}</strong>
+              <p>ห้อง: {user.room_id}</p>
+              <p>โทร: {user.phone_number || "-"}</p>
+            </li>
+          ))}
+        </ul>
+      </aside>
+    </div>
   );
-}
+};
 
 export default HomePage;
+
+const styles = {
+  container: {
+    maxWidth: "1200px",
+    margin: "0 auto",
+    padding: "1rem",
+    fontFamily: "Arial, sans-serif",
+  },
+  header: {
+    backgroundColor: "#ff6600",
+    color: "white",
+    textAlign: "center",
+    padding: "2rem",
+    borderRadius: "12px",
+    marginBottom: "2rem",
+    boxShadow: "0px 4px 15px rgba(0, 0, 0, 0.2)",
+  },
+  headerTitle: {
+    margin: 0,
+    fontSize: "2.5rem",
+  },
+  headerSubtitle: {
+    fontSize: "1.2rem",
+    marginTop: "0.5rem",
+  },
+  navigationContainer: {
+    textAlign: "center",
+    marginBottom: "2rem",
+  },
+  navigationTitle: {
+    fontSize: "1.8rem",
+    color: "#ff6600",
+    marginBottom: "1rem",
+  },
+  navigationButtons: {
+    display: "flex",
+    justifyContent: "center",
+    gap: "1.5rem",
+    flexWrap: "wrap", // รองรับการแสดงผลหลายแถว
+  },
+  navButton: {
+    display: "inline-block",
+    padding: "1.2rem 1.8rem",
+    backgroundColor: "#ff6600",
+    color: "white",
+    textDecoration: "none",
+    fontSize: "1rem", // ลดขนาดฟอนต์ในปุ่ม
+    borderRadius: "8px",
+    fontWeight: "bold",
+    boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
+    transition: "background-color 0.3s, transform 0.3s, box-shadow 0.3s",
+    width: "150px", // กำหนดความกว้างให้ปุ่ม
+    textAlign: "center",
+  },
+  sidebar: {
+    marginTop: "2rem",
+    backgroundColor: "white",
+    padding: "1rem",
+    borderRadius: "12px",
+    boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
+    overflowY: "auto",
+    maxHeight: "500px",
+  },
+  sidebarTitle: {
+    fontSize: "1.5rem",
+    color: "#ff6600",
+    borderBottom: "2px solid #ff6600",
+    paddingBottom: "0.5rem",
+    marginBottom: "1rem",
+  },
+  userList: {
+    listStyle: "none",
+    padding: 0,
+    margin: 0,
+  },
+  userItem: {
+    backgroundColor: "#f9f9f9",
+    border: "1px solid #ddd",
+    borderRadius: "8px",
+    padding: "1rem",
+    marginBottom: "1rem",
+    boxShadow: "0px 2px 5px rgba(0, 0, 0, 0.1)",
+    transition: "transform 0.3s ease, box-shadow 0.3s ease",
+  },
+
+  // Media Queries สำหรับหน้าจอขนาดเล็ก
+  "@media (max-width: 768px)": {
+    header: {
+      padding: "1.5rem", // ลด padding
+    },
+    headerTitle: {
+      fontSize: "2rem", // ลดขนาดฟอนต์
+    },
+    navigationButtons: {
+      flexDirection: "column", // เปลี่ยนจากแถวเป็นคอลัมน์
+      gap: "1rem",
+    },
+    navButton: {
+      width: "100%", // ขยายปุ่มให้เต็มความกว้าง
+    },
+    sidebar: {
+      maxHeight: "300px", // ลดความสูงของ sidebar
+    },
+  },
+
+  "@media (max-width: 480px)": {
+    header: {
+      padding: "1rem",
+    },
+    headerTitle: {
+      fontSize: "1.5rem",
+    },
+    navigationButtons: {
+      gap: "0.5rem", // ลดช่องว่างระหว่างปุ่ม
+    },
+    navButton: {
+      fontSize: "0.9rem", // ลดขนาดฟอนต์ในปุ่ม
+      padding: "0.8rem 1rem",
+    },
+    sidebarTitle: {
+      fontSize: "1.2rem",
+    },
+  },
+};
